@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var mongo = require('../connection');
+var mongo = require('../../../connection');
 
 /* GET users listing. */
 router.get('/', async function (req, res, next) {
