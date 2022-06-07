@@ -1,3 +1,5 @@
+const ObjectId = require('mongodb').ObjectId;
+
 class UserModel {
   #_id;
   #first_name;
@@ -7,15 +9,13 @@ class UserModel {
   #role_id;
 
   constructor(_id, first_name, last_name, email, password, role_id) {
-    this.#_id = _id;
+    this.#_id = ObjectId(_id);
     this.#first_name = first_name;
     this.#last_name = last_name;
     this.#email = email;
     this.#password = password;
-    this.#role_id = role_id;
-  }
+    this.#role_id = ObjectId(role_id);
 
-  toObjectInstance() {
     const obj = {
       first_name: this.#first_name,
       last_name: this.#last_name,

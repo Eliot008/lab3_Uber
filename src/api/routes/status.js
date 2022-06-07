@@ -3,14 +3,14 @@ const mongo = require('../../../connection');
 const router = express.Router();
 
 router.get('/', async function (req, res, next) {
-  const roles = await mongo.getRoles();
-  res.send(roles)
-})
+  const statuses = await mongo.getStatuses();
+  res.send(statuses);
+});
 
 router.get('/:id', async function (req, res, next) {
-  const role = await mongo.getRole(req.params.id);
-  if (role) {
-    res.send(role);
+  const status = await mongo.getStatus(req.params.id);
+  if (status) {
+    res.send(status);
   } else {
     res.send({});
   }

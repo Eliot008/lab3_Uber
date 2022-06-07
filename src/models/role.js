@@ -1,13 +1,13 @@
+const ObjectId = require('mongodb').ObjectId;
+
 class RoleModel {
   #_id;
   #role_name;
 
   constructor (_id, role_name) {
-    this.#_id = _id;
+    this.#_id = ObjectId(_id);
     this.#role_name = role_name;
-  }
 
-  toObjectInstance() {
     const obj = {
       role_name: this.#role_name
     }
