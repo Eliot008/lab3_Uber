@@ -1,4 +1,5 @@
 const { MongoClient } = require('mongodb');
+const { AuthModel } = require('../models/auth');
 const { UserModel } = require('../models/user');
 const { RoleModel } = require('../models/role');
 const { StatusModel } = require('../models/status');
@@ -57,7 +58,7 @@ class MongoService {
   }
 
   async createSuperUser() {
-    const role = await this.#client.db(this.#database).collection('t_role').findOne({ role_name: 'admin' });
+    const role = await this.getRoleByName('admin');
     bcrypt.hash(process.env.NODE_ENV_ADMIN_PASSWORD, Number(process.env.NODE_ENV_BCRYPT_SALT), async (err, hash) => {
       await this.#client
         .db(this.#database)
@@ -87,7 +88,7 @@ class MongoService {
 
   async initialize() {
     await this.connect();
-    var collections_names = ['t_role', 't_status', 't_order', 't_user'];
+    var collections_names = ['t_role', 't_status', 't_order', 't_user', 't_auth'];
     console.log('collections_names', collections_names);
     await this.#client.db(this.#database).collections(undefined, (err, collections) => {
       collections.forEach(function (collection) {
@@ -135,6 +136,16 @@ class MongoService {
     }
   }
 
+  async #getByRequestFilter(collection_name = '', filter = {}) {
+    console.log('READ: mongo - getByRequestFilter: ', collection_name);
+    try {
+      const data = await this.#collection('t_role').findOne(filter);
+      return data;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   async #update(collection_name = '', id, data_obj) {
     console.log('UPDATE: mongo - update: ', collection_name);
     try {
@@ -159,6 +170,11 @@ class MongoService {
 
   //
 
+  async createToken(data) {
+    const responseId = await this.#create('t_auth', new AuthModel(undefined, data.refresh_token));
+    return responseId;
+  }
+
   async createUser(data) {
     const responseId = await this.#create(
       't_user',
@@ -176,6 +192,11 @@ class MongoService {
   }
 
   //
+
+  async getTokens() {
+    const tokens = await this.#get('t_auth');
+    return tokens;
+  }
 
   async getUsers() {
     const users = await this.#get('t_user');
@@ -212,6 +233,11 @@ class MongoService {
     return role;
   }
 
+  async getRoleByName(name) {
+    const role = this.#getByRequestFilter('t_role', { role_name: name });
+    return role;
+  }
+
   async getOrder(id) {
     const order = await this.#getById('t_order', id);
     return order;
@@ -238,6 +264,11 @@ class MongoService {
   }
 
   //
+
+  async deleteToken(id) {
+    const responseId = await this.#delete('t_auth', id);
+    return responseId;
+  }
 
   async deleteUser(id) {
     const responseId = await this.#delete('t_user', id);

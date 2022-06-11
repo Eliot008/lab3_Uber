@@ -1,13 +1,14 @@
 const express = require('express');
 const mongo = require('../../../connection');
+const middlewares = require('../middlewares');
 const router = express.Router();
 
-router.get('/', async function (req, res, next) {
+router.get('/', middlewares.authenticateJWT, async function (req, res, next) {
   const roles = await mongo.getRoles();
   res.send(roles)
 })
 
-router.get('/:id', async function (req, res, next) {
+router.get('/:id', middlewares.authenticateJWT, async function (req, res, next) {
   const role = await mongo.getRole(req.params.id);
   if (role) {
     res.send(role);
