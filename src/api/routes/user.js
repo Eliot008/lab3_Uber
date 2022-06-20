@@ -7,7 +7,7 @@ router.get('/', middlewares.authenticateJWT, async function (req, res, next) {
   const { role } = req.user;
 
   if (role !== 'admin') {
-    return res.sendStatus(403);
+    return res.status(403);
   }
 
   const users = await mongo.getUsers();

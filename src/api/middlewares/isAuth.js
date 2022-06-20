@@ -19,12 +19,12 @@ const authenticateJWT = (req, res, next) => {
           role: roleDocument.role_name
         };
         next();
+      } else {
+        return res.sendStatus(500);
       }
-
-      res.sendStatus(500);
     });
   } else {
-    res.sendStatus(401);
+    return res.sendStatus(401);
   }
 };
 
