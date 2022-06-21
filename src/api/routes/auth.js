@@ -17,7 +17,7 @@ router.post('/login', async function (req, res, next) {
     );
     const refreshToken = jwt.sign(
       { email: user.email, roleId: user.role_id },
-      process.env.NODE_ENV_ACCESS_TOKEN_SECRET
+      process.env.NODE_ENV_REFRESH_TOKEN_SECRET
     );
 
     mongo.createToken({ refresh_token: refreshToken });
@@ -62,7 +62,7 @@ router.post('/signup', async function (req, res, next) {
     );
     const refreshToken = jwt.sign(
       { email: user.email, roleId: user.role_id },
-      process.env.NODE_ENV_ACCESS_TOKEN_SECRET
+      process.env.NODE_ENV_REFRESH_TOKEN_SECRET
     );
 
     mongo.createToken({ refresh_token: refreshToken });
@@ -72,7 +72,7 @@ router.post('/signup', async function (req, res, next) {
       refreshToken: refreshToken,
     });
   } else {
-    res.status(400).json({ message: 'Incorrect email or password' });
+    res.status(400).json({ message: 'Create user error' });
   }
 });
 
@@ -83,9 +83,16 @@ router.post('/token', async function (req, res) {
     return res.sendStatus(401);
   }
 
+  let tokenExist = false
   const refreshTokens = await mongo.getTokens();
 
-  if (!refreshTokens.includes(token)) {
+  refreshTokens.forEach(_ => {
+    if (_.refresh_token === token) {
+      tokenExist = true;
+    }
+  });
+
+  if (!tokenExist) {
     return res.sendStatus(403);
   }
 
@@ -94,10 +101,10 @@ router.post('/token', async function (req, res) {
       return res.sendStatus(403);
     }
 
-    const accessToken = jwt.sign({ username: user.username, role: user.role }, accessTokenSecret, { expiresIn: '1h' });
+    const accessToken = jwt.sign({ username: user.username, role: user.role }, process.env.NODE_ENV_ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
 
     res.json({
-      accessToken,
+      accessToken: accessToken,
     });
   });
 });
@@ -106,14 +113,14 @@ router.post('/logout', async function (req, res, next) {
   const { token } = req.body;
 
   const refreshTokens = await mongo.getTokens();
-  const { _id } = refreshTokens.find((_) => _ === token);
+  const { _id } = refreshTokens.find((_) => _.refresh_token === token);
   const responseId = await mongo.deleteToken(_id);
 
   if (responseId) {
     res.json({ message: 'Logout successful' });
   } else {
     res.status(400);
-    res.json({ message: 'Delete error' });
+    res.json({ message: 'Logout error' });
   }
 });
 
