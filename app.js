@@ -5,6 +5,7 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const cors = require('cors');
 
 const indexRouter = require('./src/api/routes/index');
 const authRouter = require('./src/api/routes/auth');
@@ -25,8 +26,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(cors());
+
 app.use('/', indexRouter);
-app.use('/auth', authRouter)
+app.use('/auth', authRouter);
 app.use('/order', ordersRouter);
 app.use('/role', rolesRouter);
 app.use('/status', statusesRouter);
